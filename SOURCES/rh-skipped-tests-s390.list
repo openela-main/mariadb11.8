@@ -1,0 +1,32 @@
+# Fails since 11.8.3
+innodb.101_compatibility					: BUG#0
+innodb.blob-crash					        : BUG#0
+innodb.doublewrite					        : BUG#0
+innodb_fts.stopword					        : BUG#0
+innodb.import_no_cfg					    : BUG#0
+innodb.innodb-32k-crash					    : BUG#0
+innodb.log_file_size_online					: BUG#0
+innodb.restart					            : BUG#0
+innodb.undo_upgrade					        : BUG#0
+innodb_zip.recover					        : BUG#0
+parts.alter_table					        : BUG#0
+rpl.rpl_gtid_mdev4485					    : BUG#0
+rpl.rpl_gtid_mdev9033					    : BUG#0
+rpl.rpl_gtid_stop_start					    : BUG#0
+rpl.rpl_heartbeat_basic					    : BUG#0
+rpl.rpl_report_port					        : BUG#0
+rpl.rpl_reset_slave_fail					: BUG#0
+rpl.rpl_row_unsafe_funcs					: BUG#0
+rpl.rpl_semi_sync_gtid_reconnect			: BUG#0
+rpl.rpl_semi_sync_master_disable_with_slave	: BUG#0
+rpl.rpl_semi_sync_ssl_stop					: BUG#0
+rpl.rpl_show_slave_status					: BUG#0
+rpl.rpl_slave_invalid_external_user			: BUG#0
+rpl.rpl_slave_restart_long_password			: BUG#0
+rpl.rpl_slave_shutdown_mdev20821			: BUG#0
+rpl.rpl_stm_loadfile					    : BUG#0
+rpl.rpl_stm_sp					            : BUG#0
+
+# Times out since 11.8.6
+mariabackup.page_compression_level          :
+mariabackup.xb_page_compress                :

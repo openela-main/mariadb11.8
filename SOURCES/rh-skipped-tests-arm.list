@@ -1,0 +1,6 @@
+# Fails since 10.11.13
+main.mysql_client_test_nonblock            : #2373007
+
+# Fails since 11.8.3
+mariabackup.aria_log_dir_path					:
+mariabackup.slave_provision_nolock              :
