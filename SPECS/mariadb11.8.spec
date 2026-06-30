@@ -1,6 +1,6 @@
 # Plain package name for cases, where %%{name} differs (e.g. for versioned packages)
 %global majorname mariadb
-%global package_version 11.8.6
+%global package_version 11.8.8
 %global majorversion %(echo %{package_version} | cut -d'.' -f1-2 )
 
 # Set if this package will be the default one in distribution
@@ -15,7 +15,7 @@
 # The last version on which the full testsuite has been run
 # In case of further rebuilds of that version, don't require full testsuite to be run
 # run only "main" suite
-%global last_tested_version 11.8.6
+%global last_tested_version 11.8.8
 # Set to 1 to force run the testsuite even if it was already tested in current version
 %global force_run_testsuite 0
 
@@ -170,7 +170,7 @@
 
 Name:             %{majorname}%{majorversion}
 Version:          %{package_version}
-Release:          2%{?with_debug:.debug}%{?dist}
+Release:          1%{?with_debug:.debug}%{?dist}
 Epoch:            3
 
 Summary:          A very fast and robust SQL database server
@@ -239,8 +239,8 @@ Patch14:          %{majorname}-mtr.patch
 
 Patch16:          %{majorname}-federated.patch
 Patch18:          pcre_bundling.patch
-
-Patch17:          upstream_87309d3d4bb8f48910d05b0ca5ee989bcdd6b053.patch
+#   Patch19: fix default Galera configuation file
+Patch19:          upstream_0a66c466f1772945d46b12bd340e1bd9adff4e9b.patch
 
 # This macro is used for package/sub-package names in the entire specfile
 %if %?mariadb_default
@@ -898,10 +898,10 @@ rm -r storage/rocksdb/
 
 %patch -P14 -p1
 %patch -P16 -p1
-%patch -P17 -p1
 %if %{with bundled_pcre}
 %patch -P18 -p1
 %endif
+%patch -P19 -p1
 
 # generate a list of tests that fail, but are not disabled by upstream
 cat %{SOURCE50} | tee -a mysql-test/unstable-tests
@@ -1480,6 +1480,7 @@ fi
 %{_bindir}/mysql{admin,binlog,check,dump,import,_plugin,show,slap,_tzinfo_to_sql,_waitpid}
 %{_bindir}/mariadb-{admin,binlog,check,dump,import,plugin,show,slap,tzinfo-to-sql,waitpid}
 %{_bindir}/my_print_defaults
+%{_bindir}/mariadb-migrate-config-file
 
 %{_mandir}/man1/{msql2mysql,replace}.1*
 %{_mandir}/man1/{mysql,mariadb}.1*
@@ -1514,7 +1515,6 @@ fi
 %if %{with common}
 %files -n %{pkgname}-common
 %doc %{_docdir}/%{majorname}
-%{?with_galera:%exclude %{_docdir}/%{majorname}/MariaDB-server-%{version}/README-wsrep}
 %dir %{_datadir}/%{majorname}
 %{_datadir}/%{majorname}/charsets
 %if %{with clibrary}
@@ -1557,7 +1557,6 @@ fi
 
 %if %{with galera}
 %files -n %{pkgname}-server-galera
-%doc Docs/README-wsrep
 %license LICENSE.clustercheck
 %{_bindir}/clustercheck
 %{_bindir}/galera_new_cluster
@@ -1851,6 +1850,8 @@ fi
 %{_libdir}/%{majorname}/plugin/type_mysql_timestamp.so
 %{_libdir}/%{majorname}/plugin/type_test.so
 %{_libdir}/%{majorname}/plugin/daemon_example.ini
+%dir %{_libdir}/%{majorname}/plugin/test_pam_modules
+%{_libdir}/%{majorname}/plugin/test_pam_modules/pam_mariadb_mtr.so
 %attr(-,mysql,mysql) %{_datadir}/mariadb-test
 %{_mandir}/man1/{mysql_client_test,mysqltest,mariadb-client-test,mariadb-test}.1*
 %{_mandir}/man1/my_safe_process.1*
@@ -1859,6 +1860,12 @@ fi
 %endif
 
 %changelog
+* Wed Jun 03 2026 Pavol Sloboda <psloboda@redhat.com> - 3:11.8.8-1
+- Rebase to 11.8.8
+
+* Wed May 20 2026 Michal Schorm <mschorm@redhat.com> - 3:11.8.7-1
+- Rebase to 11.8.7
+
 * Wed Feb 18 2026 Pavol Sloboda <psloboda@redhat.com> - 3:11.8.6-2
 - Added a fix for SIGSEGV when using skip-grant-tables
 - Resolves: RHBZ#2438390
