@@ -1,12 +1,50 @@
-diff -Naur mariadb-11.8.6/cmake/pcre.cmake mariadb-11.8.6_patched/cmake/pcre.cmake
---- mariadb-11.8.6/cmake/pcre.cmake	2026-01-31 14:27:46.000000000 +0100
-+++ mariadb-11.8.6_patched/cmake/pcre.cmake	2026-03-24 15:36:42.555989118 +0100
-@@ -65,7 +65,7 @@
+diff -Naur mariadb-11.8.8/cmake/pcre.cmake mariadb-11.8.8_patched/cmake/pcre.cmake
+--- mariadb-11.8.8/cmake/pcre.cmake	2026-05-24 11:58:30.000000000 +0200
++++ mariadb-11.8.8_patched/cmake/pcre.cmake	2026-10-08 16:24:39.678703168 +0200
+@@ -3,6 +3,30 @@
+ SET(WITH_PCRE "auto" CACHE STRING
+    "Which pcre to use (possible values are 'bundled', 'system', or 'auto')")
+ 
++SET(PCRE2_PATCH_DIR "" CACHE PATH
++   "Directory containing .patch files to apply to bundled pcre2 (applied in sorted order)")
++
++FUNCTION(PCRE2_BUILD_PATCH_COMMAND out_var patch_dir)
++  SET(patch_cmd)
++  IF(patch_dir AND NOT IS_ABSOLUTE "${patch_dir}")                            
++    SET(patch_dir "${CMAKE_BINARY_DIR}/${patch_dir}")                         
++  ENDIF()  
++  IF(patch_dir AND EXISTS "${patch_dir}")
++    FILE(GLOB patches "${patch_dir}/*.patch")
++    LIST(SORT patches)
++    LIST(LENGTH patches n)
++    IF(n GREATER 0)
++      LIST(GET patches 0 first)
++      SET(patch_cmd PATCH_COMMAND patch -p1 -i "${first}")
++      LIST(REMOVE_AT patches 0)
++      FOREACH(p ${patches})
++        LIST(APPEND patch_cmd COMMAND patch -p1 -i "${p}")
++      ENDFOREACH()
++    ENDIF()
++  ENDIF()
++  SET(${out_var} ${patch_cmd} PARENT_SCOPE)
++ENDFUNCTION()
++
+ MACRO(BUNDLE_PCRE2)
+   SET(WITH_PCRE "bundled" CACHE STRING
+    "Which pcre to use (possible values are 'bundled', 'system', or 'auto')")
+@@ -62,11 +86,14 @@
+     SET(CMAKE_MSVC_RUNTIME_LIBRARY_ARG)
+   ENDIF()
+ 
++  PCRE2_BUILD_PATCH_COMMAND(pcre2_patch_cmd "${PCRE2_PATCH_DIR}")
++
    ExternalProject_Add(
      pcre2
      PREFIX   "${dir}"
 -    URL "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.47/pcre2-10.47.zip"
 +    URL "file:///${dir}/pcre2-10.47.zip"
      URL_MD5 7906aec38f872b74f1b925122dde9069
++    ${pcre2_patch_cmd}
      INSTALL_COMMAND ""
      CMAKE_ARGS
+       "-DCMAKE_WARN_DEPRECATED=FALSE"

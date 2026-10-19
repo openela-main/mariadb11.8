@@ -120,6 +120,9 @@
 %bcond bundled_pcre 1
 %if %{with bundled_pcre}
 %global pcre_bundled_version 10.47
+%global pcre_patch_dir %{_vpath_builddir}/extra/pcre2/patches
+%else
+%global pcre_patch_dir ""
 %endif
 
 # To avoid issues with a breaking change in FMT library, bundle it on systems where FMT wasn't fixed yet
@@ -170,7 +173,7 @@
 
 Name:             %{majorname}%{majorversion}
 Version:          %{package_version}
-Release:          1%{?with_debug:.debug}%{?dist}
+Release:          2%{?with_debug:.debug}%{?dist}
 Epoch:            3
 
 Summary:          A very fast and robust SQL database server
@@ -241,6 +244,10 @@ Patch16:          %{majorname}-federated.patch
 Patch18:          pcre_bundling.patch
 #   Patch19: fix default Galera configuation file
 Patch19:          upstream_0a66c466f1772945d46b12bd340e1bd9adff4e9b.patch
+
+Patch20:          %{majorname}-pcre-CVE-2026-103111.patch
+Patch21:          %{majorname}-pcre-CVE-2026-86145.patch
+Patch22:          %{majorname}-pcre-CVE-2026-89161.patch
 
 # This macro is used for package/sub-package names in the entire specfile
 %if %?mariadb_default
@@ -877,7 +884,11 @@ mv %{SOURCE1} %{_vpath_builddir}/extra/libfmt/
 %endif
 %if %{with bundled_pcre}
 mkdir -p %{_vpath_builddir}/extra/pcre2/
+mkdir -p %{pcre_patch_dir}
 mv %{SOURCE4} %{_vpath_builddir}/extra/pcre2/
+mv %{PATCH20} %{pcre_patch_dir}
+mv %{PATCH21} %{pcre_patch_dir}
+mv %{PATCH22} %{pcre_patch_dir}
 %endif
 
 # Remove JAR files that upstream puts into tarball
@@ -1023,6 +1034,7 @@ CXXFLAGS="$CFLAGS"; CPPFLAGS="$CFLAGS"; export CFLAGS CXXFLAGS CPPFLAGS
          -DENABLE_DTRACE=ON \
          -DSECURITY_HARDENED=OFF \
          -DWITH_PCRE=%{?with_bundled_pcre:bundled}%{!?with_bundled_pcre:system} \
+         -DPCRE2_PATCH_DIR=%{pcre_patch_dir} \
          -DWITH_WSREP=%{?with_galera:ON}%{!?with_galera:OFF} \
          -DWITH_INNODB_DISALLOW_WRITES=%{?with_galera:ON}%{!?with_galera:OFF} \
          -DWITH_EMBEDDED_SERVER=%{?with_embedded:ON}%{!?with_embedded:OFF} \
@@ -1860,6 +1872,10 @@ fi
 %endif
 
 %changelog
+* Tue Oct 06 2026 Pavol Sloboda <psloboda@redhat.com> - 3:11.8.8-2
+- Release bump for pcre2 CVE fixes
+- Resolves: CVE-2026-103111, CVE-2026-86145, CVE-2026-89161
+
 * Wed Jun 03 2026 Pavol Sloboda <psloboda@redhat.com> - 3:11.8.8-1
 - Rebase to 11.8.8
 
